@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Green AI — Smart AI Assistant</title>
+<style>
+:root{
+  --bg:#02170f; --panel:#04271a; --panel2:#063622; --line:#0a5a3b;
+  --green:#00e879; --green2:#20ff9b; --text:#ecfff6; --muted:#81bda2;
+  --danger:#ff5b5b; --shadow:0 20px 60px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:#01130c;color:var(--text);overflow:hidden;
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{height:100vh;display:flex;position:relative;overflow:hidden}
+#particles{position:fixed;inset:0;pointer-events:none;opacity:.55;z-index:0}
+.sidebar{
+  width:360px;min-width:360px;background:linear-gradient(180deg,#03281a,#011a10);
+  border-right:1px solid rgba(0,232,121,.18);padding:24px 20px;display:flex;
+  flex-direction:column;position:relative;z-index:3;
+}
+.brand{display:flex;align-items:center;gap:15px;margin-bottom:26px}
+.logo{
+  width:62px;height:62px;border-radius:19px;background:linear-gradient(145deg,#12ff91,#00a95a);
+  display:grid;place-items:center;box-shadow:0 0 30px rgba(0,232,121,.28);font-size:31px;
+}
+.brand h1{margin:0;font-size:27px;letter-spacing:-.8px}
+.brand p{margin:4px 0 0;color:#74d7a8;font-size:14px}
+.nav{display:grid;gap:12px}
+.nav button,.side-card{
+  border:1px solid #0a5c3c;background:rgba(1,50,32,.65);color:#eafff4;
+  border-radius:17px;padding:16px 18px;text-align:left;transition:.2s;
+}
+.nav button:hover{background:#06472e;border-color:#11bd70;transform:translateY(-1px)}
+.nav button strong{margin-right:9px}
+.side-card{margin-top:20px;padding:16px}
+.side-card h3{margin:0 0 12px;font-size:14px;color:#78eeb6}
+.status{margin-top:auto;border:1px solid #0a5c3c;border-radius:18px;padding:17px;background:#03301f}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);margin-right:7px}
+.status small{display:block;color:#7ab99d;margin-top:6px}
+.music{margin-top:12px}
+.music-row{display:flex;align-items:center;gap:12px}
+.album{
+  width:58px;height:58px;border-radius:12px;background:radial-gradient(circle at 35% 35%,#b4ffd9,#16b96f 38%,#062c1d 70%);
+  display:grid;place-items:center;font-size:25px;
+}
+.music-info{min-width:0;flex:1}.music-info b{display:block}.music-info span{font-size:12px;color:var(--muted)}
+.progress{height:5px;background:#0a4c32;border-radius:20px;margin:14px 0 9px;overflow:hidden}
+.progress i{display:block;height:100%;width:44%;background:linear-gradient(90deg,var(--green),#6dffc0)}
+.music-controls{display:flex;justify-content:center;gap:13px}
+.music-controls button{border:0;background:transparent;color:#b9ffdc;font-size:19px}
+.play{
+  width:40px;height:40px;border-radius:50%!important;background:var(--green)!important;color:#012114!important;
+}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative;z-index:2}
+.topbar{
+  height:92px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;
+  background:rgba(1,31,20,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,232,121,.13)
+}
+.topbrand{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:800}
+.leaf{color:var(--green);font-size:27px}
+.topright{display:flex;align-items:center;gap:16px;color:#70e8ae}
+.iconbtn{
+  width:43px;height:43px;border-radius:50%;border:1px solid #1b6b4b;background:#062c1e;color:#d8ffed
+}
+.online{font-size:14px}
+.chat{
+  flex:1;overflow:auto;padding:42px 7vw 180px;scroll-behavior:smooth;position:relative
+}
+.chat:before{
+  content:"";position:absolute;inset:0;z-index:-2;
+  background:
+   radial-gradient(circle at 74% 28%,rgba(0,232,121,.13),transparent 27%),
+   radial-gradient(circle at 25% 75%,rgba(0,170,95,.12),transparent 30%),
+   linear-gradient(135deg,#032c1d 0%,#012116 48%,#004528 100%);
+}
+.chat:after{
+  content:"♫  ♪  ♫";position:absolute;right:7%;top:10%;font-size:85px;color:rgba(47,255,154,.07);
+  transform:rotate(-7deg);z-index:-1;letter-spacing:25px;
+}
+.msg{display:flex;gap:14px;margin:0 auto 24px;max-width:1050px;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.user{justify-content:flex-end}
+.avatar{
+  width:42px;height:42px;border-radius:14px;background:#0b4a30;display:grid;place-items:center;
+  flex:0 0 auto;border:1px solid #138052
+}
+.user .avatar{order:2;background:#173e30}
+.bubble{
+  max-width:min(850px,80%);border:1px solid #116343;border-radius:19px;padding:17px 19px;
+  background:rgba(3,43,28,.82);box-shadow:0 10px 30px rgba(0,0,0,.15);line-height:1.6;
+  white-space:pre-wrap;overflow-wrap:anywhere
+}
+.user .bubble{background:linear-gradient(135deg,#075f3d,#08794c);border-color:#15ad6d}
+.meta{font-size:12px;color:#75b99c;margin-bottom:6px}
+.composer-wrap{
+  position:absolute;left:0;right:0;bottom:0;padding:0 7vw 26px;
+  background:linear-gradient(transparent,rgba(1,20,13,.92) 30%,#01160e 100%);
+}
+.composer{
+  max-width:1050px;margin:auto;border:1px solid #12b970;border-radius:22px;background:rgba(2,31,20,.9);
+  box-shadow:0 0 0 1px rgba(0,232,121,.08),0 20px 60px rgba(0,0,0,.45);display:flex;align-items:flex-end;padding:10px 12px
+}
+textarea{
+  flex:1;resize:none;min-height:55px;max-height:150px;background:transparent;border:0;outline:0;
+  color:white;padding:15px;font-size:16px
+}
+textarea::placeholder{color:#65977f}
+.send{
+  width:55px;height:55px;border:0;border-radius:17px;background:linear-gradient(145deg,#12f18c,#00bd67);
+  color:#012215;font-size:25px;font-weight:900;box-shadow:0 0 25px rgba(0,232,121,.22)
+}
+.tools{display:flex;gap:7px;padding:0 5px 7px}
+.tool{border:0;background:transparent;color:#80c7a7;font-size:18px}
+.footer{text-align:center;font-size:11px;color:#527d6a;margin-top:8px}
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);display:none;
+  place-items:center;z-index:20;padding:20px
+}
+.modal.show{display:grid}
+.dialog{
+  width:min(580px,100%);background:#04271a;border:1px solid #0c6a46;border-radius:24px;padding:25px;
+  box-shadow:var(--shadow)
+}
+.dialog h2{margin-top:0}
+.field{margin:16px 0}.field label{display:block;color:#8dd7b3;font-size:13px;margin-bottom:8px}
+.field input,.field select{
+  width:100%;background:#011a10;color:white;border:1px solid #0c6040;border-radius:12px;padding:13px;outline:0
+}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.btn{border:1px solid #0b7049;background:#063a27;color:white;padding:11px 16px;border-radius:12px}
+.btn.primary{background:#08c976;color:#012415;border-color:#08c976;font-weight:800}
+.note{font-size:12px;color:#73a890;line-height:1.5}
+.web-toggle{display:flex;align-items:center;gap:10px;color:#9de2c0;font-size:13px;margin-top:10px}
+@media(max-width:900px){
+ .sidebar{width:86px;min-width:86px;padding:18px 12px}
+ .brand div:not(.logo),.nav button span,.side-card,.status small,.music-info{display:none}
+ .brand{justify-content:center}.nav button{padding:15px;text-align:center}.nav button strong{margin:0}
+ .status{text-align:center;padding:13px}.status div{font-size:0}.status .dot{margin:0}
+ .topbar{padding:0 18px}.chat{padding-left:18px;padding-right:18px}.composer-wrap{padding:0 18px 16px}
+}
+@media(max-width:600px){
+ .topbrand{font-size:18px}.online{display:none}.bubble{max-width:88%}
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">🌿</div>
+      <div><h1>Green AI</h1><p>Smart AI Assistant</p></div>
+    </div>
+
+    <div class="nav">
+      <button onclick="newChat()"><strong>＋</strong><span>New Chat</span></button>
+      <button onclick="clearChat()"><strong>◷</strong><span>Chat History</span></button>
+      <button onclick="openSettings()"><strong>🔑</strong><span>API Key & Settings</span></button>
+    </div>
+
+    <div class="side-card music">
+      <h3>♫ NOW PLAYING</h3>
+      <div class="music-row">
+        <div class="album">♫</div>
+        <div class="music-info"><b>Green Vibes</b><span>Ambient Melody • Green AI</span></div>
+      </div>
+      <div class="progress"><i id="musicProgress"></i></div>
+      <div class="music-controls">
+        <button onclick="prevNote()">⏮</button>
+        <button class="play" id="musicBtn" onclick="toggleMusic()">▶</button>
+        <button onclick="nextNote()">⏭</button>
+      </div>
+    </div>
+
+    <div class="status">
+      <div><span class="dot"></span><b id="statusText">AI Ready</b></div>
+      <small id="statusSub">Add an API key to start chatting</small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbrand"><span class="leaf">🌿</span> Green AI</div>
+      <div class="topright">
+        <button class="iconbtn" onclick="toggleTheme()" title="Theme">☾</button>
+        <button class="iconbtn" onclick="toggleMusic()" title="Music">♫</button>
+        <span class="online">● AI Online</span>
+      </div>
+    </header>
+
+    <section class="chat" id="chat"></section>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <div class="tools">
+          <button class="tool" onclick="openSettings()" title="Settings">⚙</button>
+        </div>
+        <textarea id="input" rows="1" placeholder="Message Green AI..." autocomplete="off"></textarea>
+        <button class="send" id="sendBtn" onclick="sendMessage()">➤</button>
+      </div>
+      <div class="footer">Green AI • Powered by AI • Always here to help you 🌱</div>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="dialog">
+    <h2>🌿 Green AI Settings</h2>
+    <p class="note">For this browser-only demo, your API key is stored locally in this browser. Do not publish this HTML with your personal key inside it. For a real public website, move the API call to a backend server.</p>
+    <div class="field">
+      <label>OpenAI API Key</label>
+      <input id="apiKey" type="password" placeholder="sk-..." />
+    </div>
+    <div class="field">
+      <label>Model</label>
+      <select id="model">
+        <option value="gpt-6-luna">gpt-6-luna</option>
+        <option value="gpt-6-sol">gpt-6-sol</option>
+      </select>
+    </div>
+    <label class="web-toggle">
+      <input type="checkbox" id="webSearch">
+      Enable web search for current information
+    </label>
+    <div class="actions">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn primary" onclick="saveSettings()">Save & Connect</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const chatEl = document.getElementById("chat");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const apiKeyEl = document.getElementById("apiKey");
+const modelEl = document.getElementById("model");
+const webSearchEl = document.getElementById("webSearch");
+const statusText = document.getElementById("statusText");
+const statusSub = document.getElementById("statusSub");
+
+let messages = JSON.parse(localStorage.getItem("greenAI_messages") || "[]");
+let musicOn = false, audioCtx = null, melodyTimer = null, noteIndex = 0;
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function timeNow(){
+  return new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+}
+function render(){
+  chatEl.innerHTML = "";
+  if(!messages.length){
+    addMessageToDOM("assistant",
+`Hello! 👋 I’m Green AI.
+
+I can help you learn, write code, solve problems, explain topics, brainstorm ideas, and more.
+
+Open API Key & Settings, add your API key, then ask me anything. 🌱`);
+    return;
+  }
+  messages.forEach(m => addMessageToDOM(m.role, m.content, false));
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+function addMessageToDOM(role, content, save=true){
+  const wrap=document.createElement("div");
+  wrap.className="msg "+(role==="user"?"user":"assistant");
+  const avatar=document.createElement("div");
+  avatar.className="avatar";
+  avatar.textContent=role==="user"?"👤":"🌿";
+  const body=document.createElement("div");
+  const meta=document.createElement("div");
+  meta.className="meta";
+  meta.textContent=role==="user"?"You":"Green AI";
+  const bubble=document.createElement("div");
+  bubble.className="bubble";
+  bubble.innerHTML=escapeHtml(content);
+  body.append(meta,bubble);
+  wrap.append(avatar,body);
+  chatEl.appendChild(wrap);
+  if(save){
+    messages.push({role,content});
+    localStorage.setItem("greenAI_messages",JSON.stringify(messages.slice(-40)));
+  }
+  chatEl.scrollTop=chatEl.scrollHeight;
+  return bubble;
+}
+function newChat(){
+  messages=[];
+  localStorage.removeItem("greenAI_messages");
+  chatEl.innerHTML="";
+  addMessageToDOM("assistant","New chat started 🌱\n\nWhat would you like to talk about?");
+}
+function clearChat(){
+  if(confirm("Clear this chat history?")) newChat();
+}
+function openSettings(){
+  apiKeyEl.value=localStorage.getItem("greenAI_apiKey")||"";
+  modelEl.value=localStorage.getItem("greenAI_model")||"gpt-6-luna";
+  webSearchEl.checked=localStorage.getItem("greenAI_web")==="1";
+  document.getElementById("settingsModal").classList.add("show");
+}
+function closeSettings(){document.getElementById("settingsModal").classList.remove("show")}
+function saveSettings(){
+  const key=apiKeyEl.value.trim();
+  if(!key){alert("Please enter your API key.");return}
+  localStorage.setItem("greenAI_apiKey",key);
+  localStorage.setItem("greenAI_model",modelEl.value);
+  localStorage.setItem("greenAI_web",webSearchEl.checked?"1":"0");
+  statusText.textContent="AI Ready";
+  statusSub.textContent="API key saved locally";
+  closeSettings();
+}
+function setBusy(b){
+  sendBtn.disabled=b;
+  sendBtn.style.opacity=b?".5":"1";
+  statusText.textContent=b?"Thinking…":"AI Ready";
+  statusSub.textContent=b?"Green AI is generating an answer":"Ready to help you";
+}
+function extractText(data){
+  if(typeof data.output_text==="string" && data.output_text) return data.output_text;
+  const out=[];
+  for(const item of (data.output||[])){
+    for(const c of (item.content||[])){
+      if(c.type==="output_text" && c.text) out.push(c.text);
+    }
+  }
+  return out.join("\n").trim();
+}
+async function sendMessage(){
+  const text=input.value.trim();
+  if(!text) return;
+  const key=localStorage.getItem("greenAI_apiKey");
+  if(!key){openSettings();return}
+
+  input.value="";
+  input.style.height="55px";
+  addMessageToDOM("user",text);
+  setBusy(true);
+
+  const history=messages.slice(-18).map(m=>({
+    role:m.role==="assistant"?"assistant":"user",
+    content:m.content
+  }));
+
+  const body={
+    model:localStorage.getItem("greenAI_model")||"gpt-6-luna",
+    instructions:
+`You are Green AI, a friendly, intelligent assistant.
+Answer clearly and accurately.
+You can communicate in English, Kinyarwanda, French, and other languages when appropriate.
+For programming questions, give practical working examples and explain them simply.
+Never pretend you have information you do not have.
+If current information is requested and web search is enabled, use web search.
+Keep answers useful and organized.`,
+    input:history
+  };
+
+  if(localStorage.getItem("greenAI_web")==="1"){
+    body.tools=[{type:"web_search"}];
+  }
+
+  try{
+    const res=await fetch("https://api.openai.com/v1/responses",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+key
+      },
+      body:JSON.stringify(body)
+    });
+    const data=await res.json();
+    if(!res.ok){
+      const detail=data?.error?.message||"API request failed.";
+      throw new Error(detail);
+    }
+    const answer=extractText(data)||"I received a response, but no text was returned.";
+    addMessageToDOM("assistant",answer);
+  }catch(err){
+    addMessageToDOM("assistant",
+`❌ I could not connect to the AI service.
+
+${err.message}
+
+Check:
+1. Your API key is correct and active.
+2. Your API account has access/credits.
+3. Your internet connection is working.
+4. If you enabled Web Search, try disabling it and test again.`);
+  }finally{
+    setBusy(false);
+  }
+}
+
+input.addEventListener("keydown",e=>{
+  if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendMessage()}
+});
+input.addEventListener("input",()=>{
+  input.style.height="55px";
+  input.style.height=Math.min(input.scrollHeight,150)+"px";
+});
+
+function toggleTheme(){
+  document.body.classList.toggle("bright");
+  // Keep the Green AI visual style; this button simply changes the top icon state.
+}
+function initParticles(){
+  const c=document.getElementById("particles"),x=c.getContext("2d");
+  let W,H,pts=[];
+  function resize(){W=c.width=innerWidth*devicePixelRatio;H=c.height=innerHeight*devicePixelRatio;x.scale(devicePixelRatio,devicePixelRatio);W=innerWidth;H=innerHeight}
+  resize(); addEventListener("resize",resize);
+  for(let i=0;i<85;i++)pts.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2+0.5,v:Math.random()*.35+.08});
+  function draw(){
+    x.clearRect(0,0,W,H);
+    for(const p of pts){
+      p.y-=p.v;if(p.y<0)p.y=H;
+      x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fillStyle="rgba(0,232,121,.75)";x.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+function startAmbient(){
+  if(musicOn)return;
+  musicOn=true;
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23];
+  function tick(){
+    if(!musicOn)return;
+    const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+    osc.type="sine";osc.frequency.value=notes[noteIndex++%notes.length];
+    gain.gain.setValueAtTime(0,audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(.035,audioCtx.currentTime+.04);
+    gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.8);
+    osc.connect(gain).connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+.85);
+    melodyTimer=setTimeout(tick,900);
+  }
+  tick();
+  document.getElementById("musicBtn").textContent="Ⅱ";
+}
+function stopAmbient(){
+  musicOn=false;clearTimeout(melodyTimer);
+  if(audioCtx){audioCtx.close();audioCtx=null}
+  document.getElementById("musicBtn").textContent="▶";
+}
+function toggleMusic(){musicOn?stopAmbient():startAmbient()}
+function prevNote(){noteIndex=Math.max(0,noteIndex-2)}
+function nextNote(){noteIndex+=2}
+
+document.addEventListener("click",e=>{
+  if(e.target.id==="settingsModal")closeSettings();
+});
+
+initParticles();
+render();
+
+if(localStorage.getItem("greenAI_apiKey")){
+  statusText.textContent="AI Ready";
+  statusSub.textContent="API key saved locally";
+}
+</script>
+</body>
+</html>
